@@ -1,0 +1,8 @@
+applicationType: rest_api
+defaultPackage: scott.mil
+testFramework: spock
+sourceLanguage: groovy
+buildTool: gradle
+gormImpl: gorm-hibernate5
+servletImpl: spring-boot-starter-tomcat
+features: [app-name, base, gorm-hibernate5, gradle, grails-application, grails-console, grails-dependencies, grails-gorm-testing-support, grails-gradle-plugin, grails-quartz, grails-url-mappings, grails-web, grails-web-console, hibernate-validator, logback, micronaut-http-client, micronaut-inject-groovy, postgres, readme, spock, spring-boot-autoconfigure, spring-boot-devtools, spring-boot-starter, spring-boot-starter-tomcat, testcontainers, views-json, views-json-testing-support, yaml]

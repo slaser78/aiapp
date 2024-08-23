@@ -1,0 +1,11 @@
+import scott.mil.Person
+
+model {
+	Person person
+}
+json {
+	id person.id
+	name person.name
+	role person.role.role
+	date person.date
+}

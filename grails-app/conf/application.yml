@@ -1,0 +1,154 @@
+#file: noinspection SpringBootApplicationYaml,SpringBootApplicationYaml,SpringBootApplicationYaml,SpringBootApplicationYaml,SpringBootApplicationYaml,SpringBootApplicationYaml,SpringBootApplicationYaml,SpringBootApplicationYaml,SpringBootApplicationYaml,SpringBootApplicationYaml,SpringBootApplicationYaml,SpringBootApplicationYaml,SpringBootApplicationYaml,SpringBootApplicationYaml,SpringBootApplicationYaml,SpringBootApplicationYaml,SpringBootApplicationYaml,SpringBootApplicationYaml,SpringBootApplicationYaml,SpringBootApplicationYaml,SpringBootApplicationYaml,SpringBootApplicationYaml,SpringBootApplicationYaml,SpringBootApplicationYaml,SpringBootApplicationYaml,SpringBootApplicationYaml,SpringBootApplicationYaml,SpringBootApplicationYaml,SpringBootApplicationYaml,SpringBootApplicationYaml,SpringBootApplicationYaml,SpringBootApplicationYaml,SpringBootApplicationYaml,SpringBootApplicationYaml,SpringBootApplicationYaml,SpringBootApplicationYaml,SpringBootApplicationYaml,SpringBootApplicationYaml,SpringBootApplicationYaml,SpringBootApplicationYaml,SpringBootApplicationYaml,SpringBootApplicationYaml,SpringBootApplicationYaml,SpringBootApplicationYaml,SpringBootApplicationYaml,SpringBootApplicationYaml,SpringBootApplicationYaml,SpringBootApplicationYaml,SpringBootApplicationYaml,SpringBootApplicationYaml,SpringBootApplicationYaml,SpringBootApplicationYaml,SpringBootApplicationYaml,SpringBootApplicationYaml,SpringBootApplicationYaml,SpringBootApplicationYaml,SpringBootApplicationYaml,SpringBootApplicationYaml,SpringBootApplicationYaml,SpringBootApplicationYaml,SpringBootApplicationYaml,SpringBootApplicationYaml,SpringBootApplicationYaml,SpringBootApplicationYaml,SpringBootApplicationYaml,SpringBootApplicationYaml,SpringBootApplicationYaml,SpringBootApplicationYaml,SpringBootApplicationYaml,SpringBootApplicationYaml,SpringBootApplicationYaml,SpringBootApplicationYaml,SpringBootApplicationYaml,SpringBootApplicationYaml,SpringBootApplicationYaml,SpringBootApplicationYaml,SpringBootApplicationYaml
+---
+grails:
+    profile: rest-api
+    codegen:
+        defaultPackage: aiapp
+    gorm:
+        reactor:
+            # Whether to translate GORM events into Reactor events
+            # Disabled by default for performance reasons
+            events: false
+info:
+    app:
+        name: '@info.app.name@'
+        version: '@info.app.version@'
+        grailsVersion: '@info.app.grailsVersion@'
+spring:
+    jmx:
+        unique-names: true
+    main:
+        banner-mode: "off"
+    groovy:
+        template:
+            check-template-location: false
+    devtools:
+        restart:
+            additional-exclude:
+                - '*.gsp'
+                - '**/*.gsp'
+                - '*.gson'
+                - '**/*.gson'
+                - 'logback.groovy'
+                - '*.properties'
+environments:
+    development:
+        management:
+            endpoints:
+                enabled-by-default: true
+                web:
+                    base-path: '/actuator'
+                    exposure:
+                        include: '*'
+    production:
+        management:
+            endpoints:
+                enabled-by-default: false
+
+---
+grails:
+    mime:
+        disable:
+            accept:
+                header:
+                    userAgents:
+                        - Gecko
+                        - WebKit
+                        - Presto
+                        - Trident
+        types:
+            json:
+              - application/json
+              - text/json
+            hal:
+              - application/hal+json
+              - application/hal+xml
+            xml:
+              - text/xml
+              - application/xml
+            atom: application/atom+xml
+            css: text/css
+            csv: text/csv
+            js: text/javascript
+            rss: application/rss+xml
+            text: text/plain
+            all: '*/*'
+    urlmapping:
+        cache:
+            maxsize: 1000
+    controllers:
+        defaultScope: singleton
+        upload:
+            maxFileSize: 1073741824
+            maxRequestSize: 1073741824
+    converters:
+        encoding: UTF-8
+    config:
+        locations:
+            - file:///home/scott/.grails/jsgptConfig.yml
+    databinding:
+        dateFormats:
+            - "MM/dd/yyyy"
+    cors:
+        enabled: true
+        allowedOrigins: [ '*' ]
+---
+hibernate:
+    allow_update_outside_transaction: true
+    cache:
+        queries: false
+        use_second_level_cache: false
+        use_query_cache: false
+    dialect: 'org.hibernate.dialect.PostgreSQL10Dialect'
+dataSource:
+    pooled: true
+    jmxExport: true
+
+environments:
+    development:
+        dataSource:
+            driverClassName: org.postgresql.Driver
+            username: postgres
+            password: '1q2w3e4r!Q@W#E$R'
+            dbCreate: update
+            url: jdbc:postgresql://localhost:5432/aidb
+            properties:
+                jmxEnabled: true
+                initialSize: 5
+                maxActive: 50
+                minIdle: 5
+                maxIdle: 25
+                maxWait: 10000
+                maxAge: 600000
+                timeBetweenEvictionRunsMillis: 5000
+                minEvictableIdleTimeMillis: 60000
+                validationQuery: SELECT 1
+                validationQueryTimeout: 3
+                validationInterval: 15000
+                testOnBorrow: true
+                testWhileIdle: true
+                testOnReturn: false
+                jdbcInterceptors: ConnectionState
+                defaultTransactionIsolation: 2 # TRANSACTION_READ_COMMITTED
+    production:
+        dataSource:
+            dbCreate: update
+            url: jdbc:postgresql://sfevrpg04s.jten.smil.mil:5432/aidb?ssl=true&sslmode=verify-full&sslfactory=org.postgresql.ssl.jdbc4.LibPQFactory&sslcert=/home/oracle/Certs/oracle.pem&sslkey=/home/oracle/Certs/oracle.pk8&sslrootcert=/home/oracle/Certs/JCWRootCA1.pem
+            properties:
+                jmxEnabled: true
+                initialSize: 5
+                maxActive: 50
+                minIdle: 5
+                maxIdle: 25
+                maxWait: 10000
+                maxAge: 600000
+                timeBetweenEvictionRunsMillis: 5000
+                minEvictableIdleTimeMillis: 60000
+                validationQuery: SELECT 1
+                validationQueryTimeout: 3
+                validationInterval: 15000
+                testOnBorrow: true
+                testWhileIdle: true
+                testOnReturn: false
+                jdbcInterceptors: ConnectionState
+                defaultTransactionIsolation: 2 # TRANSACTION_READ_COMMITTED

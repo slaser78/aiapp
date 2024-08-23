@@ -1,0 +1,15 @@
+import scott.mil.Feedback
+
+model {
+	Feedback feedback
+}
+
+json {
+	id feedback.id
+	comment feedback.comment
+	reviewed feedback.reviewed
+	submitDate feedback.submitDate
+	person feedback.person.name
+	topic feedback.topic.name
+	response feedback.response
+}
