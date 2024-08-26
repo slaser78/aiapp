@@ -36,30 +36,26 @@ class SourceService {
     }
 
     @Transactional
-    def addSourcesToPerson(def sources, def person){
-        Person person1 = Person.findWhere(name: person)
-        if (sources) {
-            for (source in sources){
-                Source source1 = Source.findWhere(name: source)
-                PersonSource personSource = PersonSource.findWhere(person: person1, source: source1)
-                if (!personSource){
-                    new PersonSource(person: person1, source:source1).save(flush:true)
+    def addPersonsSources(String persons, String sources) {
+        def personsArray = persons.split(",")
+        def sourcesArray = sources.split(",")
+        ArrayList personSourceList = []
+            for (person in personsArray) {
+                for (source in sourcesArray) {
+                    Person person1 = Person.findWhere(name: person)
+                    Source source1 = Source.findWhere(name: source)
+                    PersonSource personSource = PersonSource.findWhere(person: person1, source: source1)
+                    if (!personSource) {
+                        def newPersonSource = new PersonSource(person: person1, source: source1)
+                        newPersonSource.save(flush:true)
+                        Map personSourceMap = [
+                            "source": newPersonSource.source.name,
+                            "id": newPersonSource.id,
+                            "person": newPersonSource.person.name]
+                        personSourceList += personSourceMap
+                    }
                 }
             }
-        }
-
-    }
-    @Transactional
-    def addPersonsToSource(def persons, def source) {
-        Source source1   = Source.findWhere(name: source)
-        if (persons){
-            for (person in persons){
-                Person person1 = Person.findWhere(name: person )
-                PersonSource sourcePerson = PersonSource.findWhere(person: person1, source: source1)
-                if (!sourcePerson) {
-                    new PersonSource(person: person1, source: source1)
-                }
-            }
-        }
+        return personSourceList
     }
 }

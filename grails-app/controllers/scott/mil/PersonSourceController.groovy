@@ -40,15 +40,19 @@ class PersonSourceController {
         }
         respond personSourceList
     }
+
     @Transactional
-    def addPersonsToSource() {
-        sourceService.addPersonsToSource(params.persons, params.source)
-        respond "Complete"
+    def addPersonsSources() {
+        String persons = params.persons
+        String sources = params.sources
+        def response1 = sourceService.addPersonsSources(persons, sources)
+        def response2 = ["data":response1]
+        respond response2
     }
 
     @Transactional
-    def addSourcesToPerson() {
-        sourceService.addSourcesToPerson(params.person, params.sources)
-        respond "Complete"
+    def delete (PersonSource personSource){
+        personSource.delete(flush:true);
+        respond ("Complete")
     }
 }

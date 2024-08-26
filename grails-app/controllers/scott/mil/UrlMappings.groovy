@@ -17,7 +17,6 @@ class UrlMappings {
         "/getPersonSource" (controller: "personSource", action: "getPersonSource")
         "/setPerson" (controller: "person", action: 'setPerson')
         "/setSource" (controller: "personSource", action: 'setSource')
-        "/addPersonsToSource" (controller: 'personSource', action: 'addPersonsToSource')
-        "/addSourcesToPerson" (controller: 'personSource', action: 'addSourcesToPerson')
+        "/addPersonsSources" (controller: 'personSource', action: 'addPersonsSources')
     }
 }
