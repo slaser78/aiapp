@@ -34,6 +34,11 @@ class PersonController {
     @Transactional
     def delete(Person person) {
         log.warn("Delete person: ${person.name}")
+        def personSources = PersonSource.findAllWhere(person: person)
+        if (personSources) {
+            for (entry in personSources)
+                entry.delete(flush:true)
+        }
         person.delete()
         redirect action: "index", method: "GET"
     }

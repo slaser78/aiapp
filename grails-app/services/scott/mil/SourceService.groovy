@@ -1,11 +1,24 @@
 package scott.mil
 
+import grails.converters.JSON
+import grails.core.GrailsApplication
+import groovy.json.JsonSlurper
 import groovy.transform.CompileStatic
-
+import org.apache.hc.client5.http.classic.methods.HttpPost
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager
+import org.apache.hc.client5.http.protocol.HttpClientContext
+import org.apache.hc.client5.http.socket.ConnectionSocketFactory
+import org.apache.hc.core5.http.config.Registry
+import org.apache.hc.core5.http.config.RegistryBuilder
+import org.apache.hc.core5.http.io.entity.EntityUtils
+import org.apache.hc.core5.http.io.entity.StringEntity
 import javax.transaction.Transactional
 
 @CompileStatic
 class SourceService {
+    GrailsApplication grailsApplication
      def setSource(String sources, String name) {
         //split returned sources values into each source
         def sources1 = sources.split(",")
@@ -57,5 +70,36 @@ class SourceService {
                 }
             }
         return personSourceList
+    }
+
+    def saveSource (Source source) {
+        def newSource = new Source(name: source.name, description: source.description, enabled: source.enabled, public1: source.public1)
+        newSource.save(flush:true)
+        def json = ""
+        String query = source.name
+        def uri = grailsApplication.config.getProperty('elastic', String.class) + 'collections'
+        Registry<ConnectionSocketFactory> registry = RegistryBuilder.<ConnectionSocketFactory> create()
+                .register("http", '' as ConnectionSocketFactory)
+                .build()
+        CloseableHttpClient httpClient = HttpClientBuilder.create()
+                .setConnectionManager(new PoolingHttpClientConnectionManager(registry))
+                .build()
+        HttpPost httpPost = new HttpPost(uri)
+        httpPost.addHeader("Content-Type", "application/json")
+        StringEntity entity = new StringEntity(query)
+        httpPost.setEntity(entity)
+        try {
+            HttpClientContext clientContext = HttpClientContext.create()
+            httpClient.execute(httpPost, clientContext, response -> {
+                json = EntityUtils.toString(response.getEntity())
+                println "JSON: " + json
+            })
+        } catch (e) {
+            log.error(e.getMessage())
+            log.error("ACAS Asset Vulnerability retrieval error:")
+        } finally {
+            httpClient.close()
+        }
+        return newSource
     }
 }

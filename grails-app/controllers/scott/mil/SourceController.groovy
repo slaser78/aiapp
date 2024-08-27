@@ -1,10 +1,16 @@
 package scott.mil
 
+import grails.core.GrailsApplication
 import grails.gorm.transactions.ReadOnly
+import groovy.json.JsonSlurper
+
 import javax.transaction.Transactional
+
 
 class SourceController {
     def sourceService
+    GrailsApplication grailsApplication
+
     @ReadOnly
     def index() {
         respond Source.list()
@@ -12,8 +18,7 @@ class SourceController {
 
     @Transactional
     def save (Source source) {
-        def newSource = new Source(name: source.name, description: source.description, enabled: source.enabled, public1: source.public1)
-        newSource.save(flush:true)
+        def newSource = sourceService.saveSource(source)
         respond newSource
     }
 
@@ -26,6 +31,7 @@ class SourceController {
     @Transactional
     def delete(Source source) {
         log.warn("Delete user: ${source.name}")
+
         List <PersonSource> personSources = PersonSource.findAllWhere(source: source)
         if (personSources) {
             for (entry in personSources){
