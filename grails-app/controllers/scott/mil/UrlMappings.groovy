@@ -18,5 +18,7 @@ class UrlMappings {
         "/setPerson" (controller: "person", action: 'setPerson')
         "/setSource" (controller: "personSource", action: 'setSource')
         "/addPersonsSources" (controller: 'personSource', action: 'addPersonsSources')
+        "/getChatSettings" (controller: 'chat', action: 'getChatSettings')
+        "/setChatSettings" (controller: 'chat', action: 'setChatSettings')
     }
 }

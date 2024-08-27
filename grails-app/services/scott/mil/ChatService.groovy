@@ -50,6 +50,26 @@ class ChatService {
                 .build()
         return (assistant.chat(person1.id.toInteger(), message))
     }
+
+    def getChatSettings(String person){
+        Person person1 = Person.findWhere(name: person)
+        def settings = []
+        if (person1.chat) {
+        Map accuracyMap =    ["accuracy": person1.chat.accuracy]
+        Map typeMap =    ["type": person1.chat.type1.type1]
+            settings = (accuracyMap + (typeMap as Map<String, Float>))
+        }
+        else {
+            Map accuracyMap = ["accuracy": 0.7]
+            Map typeMap = ["type": "Chat"]
+            settings = (accuracyMap + (typeMap as Map<String, BigDecimal>))
+        }
+        println settings
+        return settings
+    }
+
+    def setChatSettings (Float accuracy, String type1) {
+    }
 }
 
 class PersistentChatMemoryStore implements ChatMemoryStore {
