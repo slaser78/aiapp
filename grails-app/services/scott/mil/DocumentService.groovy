@@ -2,15 +2,28 @@ package scott.mil
 
 import dev.langchain4j.data.document.loader.FileSystemDocumentLoader
 import dev.langchain4j.data.segment.TextSegment
+import dev.langchain4j.store.embedding.EmbeddingStore
 import dev.langchain4j.store.embedding.EmbeddingStoreIngestor
 import dev.langchain4j.store.embedding.inmemory.InMemoryEmbeddingStore
+import grails.core.GrailsApplication
 import groovy.transform.CompileStatic
+import org.testcontainers.elasticsearch.ElasticsearchContainer
+import dev.langchain4j.data.embedding.Embedding;
+import dev.langchain4j.data.segment.TextSegment;
+import dev.langchain4j.model.embedding.onnx.allminilml6v2.AllMiniLmL6V2EmbeddingModel;
+import dev.langchain4j.model.embedding.EmbeddingModel;
+import dev.langchain4j.store.embedding.EmbeddingMatch;
+import dev.langchain4j.store.embedding.EmbeddingStore;
+import dev.langchain4j.store.embedding.elasticsearch.ElasticsearchEmbeddingStore;
+import org.testcontainers.elasticsearch.ElasticsearchContainer;
+
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import org.apache.commons.io.FileUtils
 
 @CompileStatic
 class DocumentService {
+    GrailsApplication grailsApplication
     def documentUpload(def source1, def fileName1) {
         File destDir = new File("/documentation/target")
         byte[] buffer = new byte[1024]
@@ -57,25 +70,28 @@ class DocumentService {
     }
 
     def processFiles() {
-        //process files found in /tmp/documentation/target directory
+        //process files found in /documentation/target directory
        def documents = FileSystemDocumentLoader.loadDocumentsRecursively("/documentation/target")
-        println "Documents list: " + documents.toListString()
-        InMemoryEmbeddingStore<TextSegment> embeddingStore = new InMemoryEmbeddingStore<>()
-        println "Got here"
         try {
-            EmbeddingStoreIngestor.ingest(documents, embeddingStore);
+            EmbeddingStore<TextSegment> embeddingStore = ElasticsearchEmbeddingStore.builder()
+            .serverUrl(grailsApplication.config.getProperty("elastic",String.class))
+            .dimension(384)
+            .build()
+            EmbeddingModel embeddingModel = new AllMiniLmL6V2EmbeddingModel()
+            //chunk document
+            String chunk = ""  //insert chunk to be processed for embedding
+            TextSegment segment = TextSegment.from(chunk)
+            Embedding embedding = embeddingModel.embed(segment).content()
+            embeddingStore.add(embedding, segment)
         } catch (e) {
             println e.getMessage()
         }
-        println ("Embedding Store: " + embeddingStore.serializeToJson())
-        println "Got here 1"
     }
 
     def cleanFiles() {
         //remove files found in /tmp/documentation and remove target directory
         File targetFolder = new File ("/documentation/target")
         FileUtils.cleanDirectory(targetFolder)
-        //File sourceFolder = new File("/tmp/documentation")
         //FileUtils.cleanDirectory(sourceFolder)
     }
 }

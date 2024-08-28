@@ -12,9 +12,15 @@ import dev.langchain4j.service.MemoryId
 import dev.langchain4j.service.UserMessage
 import dev.langchain4j.store.embedding.inmemory.InMemoryEmbeddingStore
 import dev.langchain4j.store.memory.chat.ChatMemoryStore
+import grails.converters.JSON
+import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
 import groovy.transform.CompileStatic
 import org.mapdb.DB;
-import org.mapdb.DBMaker;
+import org.mapdb.DBMaker
+
+import javax.servlet.http.HttpServletRequest;
+
 import static dev.langchain4j.data.message.ChatMessageDeserializer.messagesFromJson;
 import static dev.langchain4j.data.message.ChatMessageSerializer.messagesToJson;
 import static org.mapdb.Serializer.INTEGER;
@@ -53,22 +59,34 @@ class ChatService {
 
     def getChatSettings(String person){
         Person person1 = Person.findWhere(name: person)
+        Chat chat = Chat.findWhere(person: person1)
         def settings = []
-        if (person1.chat) {
-        Map accuracyMap =    ["accuracy": person1.chat.accuracy]
-        Map typeMap =    ["type": person1.chat.type1.type1]
+        if (chat) {
+        Map accuracyMap =    ["accuracy": chat.accuracy]
+        Map typeMap =    ["type1": chat.type1.type1]
             settings = (accuracyMap + (typeMap as Map<String, Float>))
         }
         else {
             Map accuracyMap = ["accuracy": 0.7]
-            Map typeMap = ["type": "Chat"]
+            Map typeMap = ["type1": "Chat"]
             settings = (accuracyMap + (typeMap as Map<String, BigDecimal>))
         }
-        println settings
+        println "Settings: " + settings
         return settings
     }
 
-    def setChatSettings (Float accuracy, String type1) {
+    def setChatSettings (Person person, Float accuracy, Type1 type1) {
+        Chat chat = Chat.findWhere(person: person)
+        if (chat){
+            chat.type1 = type1
+            chat.accuracy = accuracy
+            chat.save(flush:true)
+            return chat
+        } else {
+            Chat chat1 = new Chat(accuracy: accuracy, type1: type1, person: person)
+            chat1.save(flush:true)
+            return chat1
+        }
     }
 }
 

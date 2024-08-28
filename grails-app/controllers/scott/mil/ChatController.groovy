@@ -21,8 +21,10 @@ class ChatController {
 
     @Transactional
     def setChatSettings() {
-        println (request.getProperties())
-        //chatService.setChatSettings(object)
+        Person person = Person.findWhere(name: params.person)
+        Float accuracy = params.accuracy.toFloat()
+        Type1 type1 = Type1.findWhere(type1: params.type1)
+        respond (chatService.setChatSettings(person, accuracy, type1))
     }
 }
 
