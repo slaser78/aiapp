@@ -60,32 +60,25 @@ class ChatService {
     def getChatSettings(String person){
         Person person1 = Person.findWhere(name: person)
         Chat chat = Chat.findWhere(person: person1)
-        def settings = []
+        def accuracy
         if (chat) {
-        Map accuracyMap =    ["accuracy": chat.accuracy]
-        Map typeMap =    ["type1": chat.type1.type1]
-            settings = (accuracyMap + (typeMap as Map<String, Float>))
+            accuracy = [accuracy: chat.accuracy]
+        } else {
+            accuracy = [accuracy: 0.7]
         }
-        else {
-            Map accuracyMap = ["accuracy": 0.7]
-            Map typeMap = ["type1": "Chat"]
-            settings = (accuracyMap + (typeMap as Map<String, BigDecimal>))
-        }
-        println "Settings: " + settings
-        return settings
+        return accuracy
     }
 
-    def setChatSettings (Person person, Float accuracy, Type1 type1) {
+    def setChatSettings (Person person, Float accuracy) {
         Chat chat = Chat.findWhere(person: person)
         if (chat){
-            chat.type1 = type1
             chat.accuracy = accuracy
             chat.save(flush:true)
-            return chat
+            return chat.accuracy
         } else {
-            Chat chat1 = new Chat(accuracy: accuracy, type1: type1, person: person)
+            Chat chat1 = new Chat(accuracy: accuracy, person: person)
             chat1.save(flush:true)
-            return chat1
+            return chat1.accuracy
         }
     }
 }

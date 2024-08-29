@@ -6,5 +6,4 @@ model {
 json {
     id chat.id
     accuracy chat.accuracy
-    type1 chat.type1.type1
 }
