@@ -2,8 +2,6 @@ package scott.mil
 
 import grails.core.GrailsApplication
 import grails.gorm.transactions.ReadOnly
-import groovy.json.JsonSlurper
-
 import javax.transaction.Transactional
 
 
@@ -13,7 +11,8 @@ class SourceController {
 
     @ReadOnly
     def index() {
-        respond Source.list()
+        def sources = Source.list()
+        respond sources
     }
 
     @Transactional
@@ -41,4 +40,17 @@ class SourceController {
         source.delete (flush:true)
         respond {"Complete"}
     }
+
+    @ReadOnly
+    def getSources() {
+        def sourceList = sourceService.getSources(params.person)
+        respond sourceList
+    }
+
+    @ReadOnly
+    def getSource() {
+        def sourceList = sourceService.getSource(params.person)
+        respond sourceList
+    }
+
 }

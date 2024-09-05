@@ -23,7 +23,8 @@ class ChatController {
     def setChatSettings() {
         Person person = Person.findWhere(name: params.person)
         Float accuracy = params.accuracy.toFloat()
-        respond (chatService.setChatSettings(person, accuracy))
+        respond (chatService.setChatSettings(person, accuracy, params.sources))
+
     }
 }
 

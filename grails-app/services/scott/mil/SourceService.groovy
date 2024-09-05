@@ -92,7 +92,6 @@ class SourceService {
             HttpClientContext clientContext = HttpClientContext.create()
             httpClient.execute(httpPost, clientContext, response -> {
                 json = EntityUtils.toString(response.getEntity())
-                println "JSON: " + json
             })
         } catch (e) {
             log.error(e.getMessage())
@@ -101,5 +100,47 @@ class SourceService {
             httpClient.close()
         }
         return newSource
+    }
+
+    def getSources (String person) {
+        println "Person: " + person
+        Person person1 = Person.findWhere(name: person)
+        if (person1) {
+            def personSourceList = PersonSource.list()
+            def sourceList = []
+            for (personSource in personSourceList) {
+                if (personSource.person == person1){
+                    //check source is enabled
+                    if (personSource.source.enabled) {
+                        sourceList.add(label: personSource.source.name, id: personSource.source.id)
+                    }
+                }
+            }
+            def sourceList1 = Source.list()
+            for (source in sourceList1) {
+                //check source enabled and source is public
+                if (source.enabled && source.public1){
+                    sourceList.add(label: source.name, id: source.id)
+                }
+            }
+            return sourceList
+        }
+    }
+
+    def getSource (String person) {
+        Person person1 = Person.findWhere(name: person)
+        if (person1) {
+            def personSourceList = PersonSource.findAllWhere(person: person1)
+            def sourceList = []
+            for (personSource in personSourceList) {
+                if (personSource.person == person1){
+                    //check source is enabled
+                    if (personSource.source.enabled) {
+                        sourceList.add(label: personSource.source.name, id: personSource.source.id)
+                    }
+                }
+            }
+            return sourceList
+        }
     }
 }

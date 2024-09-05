@@ -12,15 +12,9 @@ import dev.langchain4j.service.MemoryId
 import dev.langchain4j.service.UserMessage
 import dev.langchain4j.store.embedding.inmemory.InMemoryEmbeddingStore
 import dev.langchain4j.store.memory.chat.ChatMemoryStore
-import grails.converters.JSON
-import groovy.json.JsonOutput
-import groovy.json.JsonSlurper
 import groovy.transform.CompileStatic
 import org.mapdb.DB;
 import org.mapdb.DBMaker
-
-import javax.servlet.http.HttpServletRequest;
-
 import static dev.langchain4j.data.message.ChatMessageDeserializer.messagesFromJson;
 import static dev.langchain4j.data.message.ChatMessageSerializer.messagesToJson;
 import static org.mapdb.Serializer.INTEGER;
@@ -69,8 +63,27 @@ class ChatService {
         return accuracy
     }
 
-    def setChatSettings (Person person, Float accuracy) {
+    def setChatSettings (Person person, Float accuracy, def source) {
         Chat chat = Chat.findWhere(person: person)
+        if (source) {
+            String sources = source
+            def sourceList = sources.split(",")
+            def currentSourceList = sourceList
+            for (sourceName in sourceList) {
+                    Source source1 = Source.findWhere(name: sourceName)
+                    if (!chat.source.contains(source1)) {
+                      chat.source.add(source1)
+                    } else {
+                        currentSourceList -= source1
+                    }
+                }
+                if (currentSourceList){
+                    for (source1 in currentSourceList) {
+                        Source source2 = Source.findWhere(name: source1)
+                        chat.removeFromSource(source2)
+                    }
+                }
+            }
         if (chat){
             chat.accuracy = accuracy
             chat.save(flush:true)
