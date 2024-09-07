@@ -103,7 +103,6 @@ class SourceService {
     }
 
     def getSources (String person) {
-        println "Person: " + person
         Person person1 = Person.findWhere(name: person)
         if (person1) {
             def personSourceList = PersonSource.list()
@@ -127,20 +126,4 @@ class SourceService {
         }
     }
 
-    def getSource (String person) {
-        Person person1 = Person.findWhere(name: person)
-        if (person1) {
-            def personSourceList = PersonSource.findAllWhere(person: person1)
-            def sourceList = []
-            for (personSource in personSourceList) {
-                if (personSource.person == person1){
-                    //check source is enabled
-                    if (personSource.source.enabled) {
-                        sourceList.add(label: personSource.source.name, id: personSource.source.id)
-                    }
-                }
-            }
-            return sourceList
-        }
-    }
 }

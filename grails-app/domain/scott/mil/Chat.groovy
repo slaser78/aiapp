@@ -4,7 +4,7 @@ class Chat {
     float accuracy
     Person person
     static belongsTo = [person:Person]
-    static hasMany = [source:Source]
+    Source source
 
     static constraints = {
         source nullable: true

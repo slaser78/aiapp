@@ -46,11 +46,4 @@ class SourceController {
         def sourceList = sourceService.getSources(params.person)
         respond sourceList
     }
-
-    @ReadOnly
-    def getSource() {
-        def sourceList = sourceService.getSource(params.person)
-        respond sourceList
-    }
-
 }

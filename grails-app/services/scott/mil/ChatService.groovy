@@ -62,38 +62,6 @@ class ChatService {
         }
         return accuracy
     }
-
-    def setChatSettings (Person person, Float accuracy, def source) {
-        Chat chat = Chat.findWhere(person: person)
-        if (source) {
-            String sources = source
-            def sourceList = sources.split(",")
-            def currentSourceList = sourceList
-            for (sourceName in sourceList) {
-                    Source source1 = Source.findWhere(name: sourceName)
-                    if (!chat.source.contains(source1)) {
-                      chat.source.add(source1)
-                    } else {
-                        currentSourceList -= source1
-                    }
-                }
-                if (currentSourceList){
-                    for (source1 in currentSourceList) {
-                        Source source2 = Source.findWhere(name: source1)
-                        chat.removeFromSource(source2)
-                    }
-                }
-            }
-        if (chat){
-            chat.accuracy = accuracy
-            chat.save(flush:true)
-            return chat.accuracy
-        } else {
-            Chat chat1 = new Chat(accuracy: accuracy, person: person)
-            chat1.save(flush:true)
-            return chat1.accuracy
-        }
-    }
 }
 
 class PersistentChatMemoryStore implements ChatMemoryStore {

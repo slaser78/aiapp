@@ -6,4 +6,6 @@ model {
 json {
     id chat.id
     accuracy chat.accuracy
+    person chat.person
+    source chat.source
 }

@@ -20,11 +20,31 @@ class ChatController {
     }
 
     @Transactional
-    def setChatSettings() {
-        Person person = Person.findWhere(name: params.person)
-        Float accuracy = params.accuracy.toFloat()
-        respond (chatService.setChatSettings(person, accuracy, params.sources))
+    def save (Chat chat) {
+        chat.save()
+        respond chat
+    }
 
+    @Transactional
+    def edit (Chat chat) {
+        chat.save()
+        respond chat
+    }
+
+    @ReadOnly
+    def show (Chat chat){
+        respond chat
+    }
+
+    def getChat(){
+        Person person = Person.findWhere(name: params.person)
+        Chat chat = Chat.findWhere(person: person)
+        if (chat) {
+            return chat
+        }
+        else {
+            return null
+        }
     }
 }
 
