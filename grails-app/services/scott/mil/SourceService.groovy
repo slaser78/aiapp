@@ -126,4 +126,16 @@ class SourceService {
         }
     }
 
+    def getSource(String person) {
+        Person person1 = Person.findWhere(name: person)
+        Chat chat = Chat.findWhere(person: person1)
+        if (chat.source){
+            return ['label':chat.source.name, 'id':chat.source.id]
+        }
+        else {
+            return ['label': 'JLLIS', 'id':null]
+        }
+
+    }
+
 }

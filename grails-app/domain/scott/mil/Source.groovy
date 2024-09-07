@@ -2,7 +2,6 @@ package scott.mil
 
 class Source {
     String name
-    String collection
     String description
     static hasMany = [document:Document]
     boolean enabled = false
@@ -11,7 +10,6 @@ class Source {
     static constraints = {
         name unique: true
         description nullable: true
-        collection nullable: true
     }
 
     String toString() {

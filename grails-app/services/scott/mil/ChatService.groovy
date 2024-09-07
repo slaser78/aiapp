@@ -62,6 +62,19 @@ class ChatService {
         }
         return accuracy
     }
+
+    def setChatSettings(String accuracy, String person, String source, String id){
+        Float accuracy1 = accuracy.toFloat()
+        Person person1 = Person.findWhere(name: person)
+        Source source1 = Source.findWhere(name: source)
+        Long idValue = Long.valueOf(id)
+        Chat chat = Chat.findWhere(id: idValue)
+        chat.accuracy= accuracy1
+        chat.person = person1
+        chat.source = source1
+        chat.save(flush:true)
+        println "Properties: " + chat.properties
+    }
 }
 
 class PersistentChatMemoryStore implements ChatMemoryStore {

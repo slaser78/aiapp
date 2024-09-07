@@ -1,7 +1,7 @@
 package scott.mil
 
 class Chat {
-    float accuracy
+    float accuracy = 0.7
     Person person
     static belongsTo = [person:Person]
     Source source

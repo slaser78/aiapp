@@ -18,33 +18,31 @@ class ChatController {
         def settings = chatService.getChatSettings(params.person)
         respond settings
     }
-
-    @Transactional
-    def save (Chat chat) {
-        chat.save()
-        respond chat
-    }
-
-    @Transactional
-    def edit (Chat chat) {
-        chat.save()
-        respond chat
-    }
-
     @ReadOnly
-    def show (Chat chat){
-        respond chat
-    }
-
     def getChat(){
         Person person = Person.findWhere(name: params.person)
         Chat chat = Chat.findWhere(person: person)
         if (chat) {
-            return chat
+            def chatValue = ["id":chat.id, "personId":chat.person.id, "person": chat.person.name, "source": chat.source.name, "sourceId": chat.source.id ]
+            respond chatValue
         }
         else {
             return null
         }
+    }
+
+    @Transactional
+    def setChatSettings() {
+        String accuracy = params.accuracy
+        String person = params.person
+        String source = params.source
+        if (params.id) {
+            String id = params.id
+            chatService.setChatSettings(accuracy, person, source, id)
+        } else {
+            chatService.setChatSettings(accuracy, person, source, null)
+        }
+        respond "Complete"
     }
 }
 

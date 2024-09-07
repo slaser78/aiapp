@@ -6,7 +6,6 @@ model {
 json {
 	id source.id
 	name source.name
-	collection source.collection
 	enabled source.enabled
 	description source.description
 	public1 source.public1

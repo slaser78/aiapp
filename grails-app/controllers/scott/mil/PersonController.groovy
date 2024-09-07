@@ -21,7 +21,8 @@ class PersonController {
 
     @Transactional
     def save(Person person) {
-        person.save()
+        person.save(flush:true)
+        new Chat (person: person).save()
         respond person
     }
 
