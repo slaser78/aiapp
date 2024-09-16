@@ -12,7 +12,7 @@ class DocumentController {
         String fileName1 = (request.getParameter("fileName")).toString()
         String source1 = (request.getParameter("source")).toString()
         file.transferTo(new File('/documentation/' + fileName1))
-        documentService.documentUpload(source1, fileName1)
+        documentService.documentUpload(fileName1)
         respond "Complete"
     }
 }

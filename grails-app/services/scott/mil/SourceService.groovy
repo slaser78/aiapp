@@ -67,11 +67,22 @@ class SourceService {
                 "      \"number_of_shards\": 1,  \n" +
                 "      \"number_of_replicas\": 1 \n" +
                 "    }\n" +
-                "  }\n" +
+                "  },\n" +
+                " \"mappings\": {\n" +
+                "    \"properties\": {\n" +
+                "        \"my_vector\": {\n" +
+                "            \"type\": \"dense_vector\",\n" +
+                "            \"dims\": 3\n" +
+                "        },\n" +
+                "        \"my_text\" : {\n" +
+                "         \"type\":\"keyword\"\n" +
+                "        }\n" +
+                "    }\n" +
+                " }\n" +
                 "}"
         String suffix = "/" + name
         elasticService.putRest(suffix, query)
-    }
+        }
 
     def deleteElasticIndex (String name){
         String query = ""

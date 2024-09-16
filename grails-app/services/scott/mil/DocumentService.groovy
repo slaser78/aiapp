@@ -17,7 +17,8 @@ import org.apache.commons.io.FileUtils
 @CompileStatic
 class DocumentService {
     GrailsApplication grailsApplication
-    def documentUpload(def source1, def fileName1) {
+
+    def documentUpload(def fileName1) {
         File destDir = new File("/documentation/target")
         byte[] buffer = new byte[1024]
         ZipInputStream zis = new ZipInputStream(new FileInputStream("/documentation/" + fileName1))
@@ -51,14 +52,12 @@ class DocumentService {
 
     File newFile(File destinationDir, ZipEntry zipEntry) throws IOException {
         File destFile = new File(destinationDir, zipEntry.getName());
-
         String destDirPath = destinationDir.getCanonicalPath();
         String destFilePath = destFile.getCanonicalPath();
 
         if (!destFilePath.startsWith(destDirPath + File.separator)) {
             throw new IOException("Entry is outside of the target dir: " + zipEntry.getName());
         }
-
         return destFile;
     }
 
