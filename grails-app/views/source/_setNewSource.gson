@@ -1,0 +1,12 @@
+import scott.mil.Source
+
+model {
+	Source source
+}
+json {
+	id source.id
+	name source.name
+	enabled source.enabled
+	description source.description
+	public1 source.public1
+}
