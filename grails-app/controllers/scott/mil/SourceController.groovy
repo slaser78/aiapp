@@ -17,7 +17,6 @@ class SourceController {
 
     @Transactional
     def setNewSource () {
-        println "Params Source Name: " + params.name
         def newSource = new Source(name: params.name, description: params.description, enabled: params.enabled, public1: params.public1)
         newSource.save(flush:true)
         sourceService.createElasticIndex(params.name)
