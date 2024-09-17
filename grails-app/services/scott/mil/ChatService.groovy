@@ -73,7 +73,6 @@ class ChatService {
         chat.person = person1
         chat.source = source1
         chat.save(flush:true)
-        println "Properties: " + chat.properties
     }
 }
 

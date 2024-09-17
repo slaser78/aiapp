@@ -56,6 +56,9 @@ dependencies {
     implementation 'org.testcontainers:elasticsearch:1.19.6'
     implementation 'dev.langchain4j:langchain4j-elasticsearch:0.33.0'
     implementation 'dev.langchain4j:langchain4j-embeddings-all-minilm-l6-v2:0.33.0'
+    implementation 'co.elastic.clients:elasticsearch-java:8.15.1'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.17.0'
+    implementation 'io.minio:minio:8.5.12'
     compileOnly("io.micronaut:micronaut-inject-groovy")
     console("org.grails:grails-console")
     runtimeOnly("org.apache.tomcat:tomcat-jdbc")

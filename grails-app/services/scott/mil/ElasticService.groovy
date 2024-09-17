@@ -15,6 +15,8 @@ import org.apache.hc.core5.http.config.Registry
 import org.apache.hc.core5.http.config.RegistryBuilder
 import org.apache.hc.core5.http.io.entity.EntityUtils
 import org.apache.hc.core5.http.io.entity.StringEntity
+import org.apache.http.conn.socket.PlainConnectionSocketFactory
+
 import javax.net.ssl.SSLContext
 import javax.net.ssl.TrustManager
 import javax.net.ssl.X509TrustManager
@@ -45,7 +47,7 @@ class ElasticService {
             HttpClientContext clientContext = HttpClientContext.create()
             httpClient.execute(httpPost, clientContext, response -> {
                 json = EntityUtils.toString(response.getEntity())
-                println "JSON: ${json}"
+                log.warn ( "JSON: ${json}")
             })
         } catch (e) {
             log.error("Elastic Post Error: " + e.getMessage())
@@ -74,10 +76,10 @@ class ElasticService {
             HttpClientContext clientContext = HttpClientContext.create()
             httpClient.execute(httpPut, clientContext, response -> {
                 json = EntityUtils.toString(response.getEntity())
-                println "Json: ${json}"
+                log.warn ( "JSON: ${json}")
             })
         } catch (e) {
-            println("Elastic Put Error: " + e.getMessage())
+            log.error ("Elastic Put Error: " + e.getMessage())
         } finally {
             httpClient.close()
         }
@@ -102,10 +104,10 @@ class ElasticService {
             HttpClientContext clientContext = HttpClientContext.create()
             httpClient.execute(httpGet, clientContext, response -> {
                 json = EntityUtils.toString(response.getEntity())
-                println "Json: ${json}"
+                log.warn ( "JSON: ${json}")
             })
         } catch (e) {
-            println("Elastic Get Error: " + e.getMessage())
+            log.error ("Elastic Get Error: " + e.getMessage())
         } finally {
             httpClient.close()
         }
@@ -130,13 +132,40 @@ class ElasticService {
             HttpClientContext clientContext = HttpClientContext.create()
             httpClient.execute(httpDelete, clientContext, response -> {
                 json = EntityUtils.toString(response.getEntity())
-                println "Json: ${json}"
+                log.warn ( "JSON: ${json}")
             })
         } catch (e) {
-            println("Elastic Delete Error: " + e.getMessage())
+            log.error ("Elastic Delete Error: " + e.getMessage())
         } finally {
             httpClient.close()
         }
+    }
+
+    def convertToText(String suffix, String fileAbsolutePath) {
+        def json = ""
+        File file = new File (fileAbsolutePath)
+        def base64 = file.bytes.encodeBase64().toString()
+        println "URI: " + grailsApplication.config.getProperty('tika', String.class) + suffix + base64
+        def uri = grailsApplication.config.getProperty('tika', String.class) + suffix + base64
+        Registry<ConnectionSocketFactory> registry = RegistryBuilder.<ConnectionSocketFactory> create()
+                .register("http", PlainConnectionSocketFactory.getSocketFactory())
+                .build()
+        CloseableHttpClient httpClient = HttpClientBuilder.create()
+                .setConnectionManager(new PoolingHttpClientConnectionManager(registry))
+                .build()
+        HttpPut httpPut = new HttpPut(uri)
+        httpPut.addHeader("Content-Type", "application/json")
+        try {
+            HttpClientContext clientContext = HttpClientContext.create()
+            httpClient.execute(httpPut, clientContext, response -> {
+                json = EntityUtils.toString(response.getEntity())
+            })
+        } catch (e) {
+            log.error ("Elastic Delete Error: " + e.getMessage())
+        } finally {
+            httpClient.close()
+        }
+        return json
     }
 
     def getSslContext() {
@@ -156,5 +185,9 @@ class ElasticService {
         SSLContext sslContext = SSLContext.getInstance("TLS")
         sslContext.init(null, trustAllCerts, new SecureRandom())
         return sslContext
+    }
+
+    def convertToText() {
+
     }
 }

@@ -7,6 +7,7 @@ import javax.transaction.Transactional
 
 class SourceController {
     def sourceService
+    def documentService
     GrailsApplication grailsApplication
 
     @ReadOnly
@@ -20,6 +21,7 @@ class SourceController {
         def newSource = new Source(name: params.name, description: params.description, enabled: params.enabled, public1: params.public1)
         newSource.save(flush:true)
         sourceService.createElasticIndex(params.name)
+        documentService.createMinioBucket(params.name)
         respond newSource
     }
 
@@ -41,6 +43,7 @@ class SourceController {
         }
         source.delete (flush:true)
         sourceService.deleteElasticIndex(source.name)
+        documentService.deleteMinioBucket (source.name)
         respond {"Complete"}
     }
 

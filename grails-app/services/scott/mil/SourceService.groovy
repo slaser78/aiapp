@@ -123,7 +123,5 @@ class SourceService {
         else {
             return ['label': 'JLLIS', 'id':1]
         }
-
     }
-
 }

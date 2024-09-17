@@ -14,11 +14,17 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import org.apache.commons.io.FileUtils
 
-@CompileStatic
+import io.minio.BucketExistsArgs
+import io.minio.MakeBucketArgs
+import io.minio.MinioClient
+import io.minio.UploadObjectArgs
+import io.minio.errors.MinioException
+
 class DocumentService {
+    def elasticService
     GrailsApplication grailsApplication
 
-    def documentUpload(def fileName1) {
+    def documentUpload(def fileName1, String source) {
         File destDir = new File("/documentation/target")
         byte[] buffer = new byte[1024]
         ZipInputStream zis = new ZipInputStream(new FileInputStream("/documentation/" + fileName1))
@@ -46,7 +52,7 @@ class DocumentService {
             }
             zipEntry = zis.getNextEntry();
         }
-        processFiles()
+        processFiles(source)
         cleanFiles()
     }
 
@@ -61,22 +67,41 @@ class DocumentService {
         return destFile;
     }
 
-    def processFiles() {
+    def processFiles(String source) {
         //process files found in /documentation/target directory
        def documents = FileSystemDocumentLoader.loadDocumentsRecursively("/documentation/target")
-        try {
-            EmbeddingStore<TextSegment> embeddingStore = ElasticsearchEmbeddingStore.builder()
-            .serverUrl(grailsApplication.config.getProperty("elastic",String.class))
-            .dimension(384)
-            .build()
-            EmbeddingModel embeddingModel = new AllMiniLmL6V2EmbeddingModel()
-            //chunk document
-            String chunk = ""  //insert chunk to be processed for embedding
-            TextSegment segment = TextSegment.from(chunk)
-            Embedding embedding = embeddingModel.embed(segment).content()
-            embeddingStore.add(embedding, segment)
-        } catch (e) {
-            println e.getMessage()
+        //Create embedding store
+        /*EmbeddingStore<TextSegment> embeddingStore = ElasticsearchEmbeddingStore.builder()
+                .serverUrl(grailsApplication.config.getProperty("elastic",String.class))
+                .dimension(384)
+                .build()
+        //define embedding model to be used
+        EmbeddingModel embeddingModel = new AllMiniLmL6V2EmbeddingModel()*/
+        //put each file in Minio S3 bucket
+       new File ("/documentation/target").eachFileRecurse () {
+           file ->
+               {
+                   //put each file in Minio S3 Bucket
+                   putMinio(file.absolutePath, file.name, source)
+
+                   //convert to text using Elastic's Data Extraction Service
+                   String suffix = "/extract_text/ -T "
+                   def response1 = elasticService.convertToText(suffix, file.absolutePath)
+                   println "Response: " + response1
+                   //$ PUT http://localhost:8090/extract_text/ -T file.absolutePath
+
+                   //chunk document
+                   //String chunk = ""  //insert chunk to be processed for embedding
+                   //TextSegment segment = TextSegment.from(chunk)
+
+                   //Add embedding to chunked text
+                   //Embedding embedding = embeddingModel.embed(segment).content()
+                   //embeddingStore.add(embedding, segment)
+                   //}
+                   //} catch (e) {
+                   //    log.error(e.getMessage())
+                   //}*/
+               }
         }
     }
 
@@ -85,5 +110,33 @@ class DocumentService {
         File targetFolder = new File ("/documentation/target")
         FileUtils.cleanDirectory(targetFolder)
         //FileUtils.cleanDirectory(sourceFolder)
+    }
+
+    def void putMinio(String absolutePath, String fileName, String source) {
+        try {
+            MinioClient minioClient =
+                    MinioClient.builder()
+                            .endpoint(grailsApplication.config.getProperty("minio", String.class))
+                            .credentials(grailsApplication.config.getProperty("minioaccesskey", String.class), grailsApplication.config.getProperty("miniosecretkey", String.class))
+                            .build()
+            // Check if source(name) bucket exists.
+            boolean found =
+                    minioClient.bucketExists(BucketExistsArgs.builder().bucket(source).build())
+            if (!found) {
+                // Make a new bucket using source(name)
+                minioClient.makeBucket(MakeBucketArgs.builder().bucket(source).build())
+            }
+
+            minioClient.uploadObject(
+                    UploadObjectArgs.builder()
+                            .bucket(source)
+                            .object(fileName)
+                            .filename(absolutePath)
+                            .build());
+            log.warn ( "Uploaded ${fileName} to bucket ${source}")
+        } catch (MinioException e) {
+            log.error ("Error occurred: " + e);
+            log.error ("HTTP trace: " + e.httpTrace());
+        }
     }
 }
