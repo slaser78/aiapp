@@ -1,7 +1,10 @@
 package scott.mil
 
 import dev.langchain4j.data.document.loader.FileSystemDocumentLoader
-
+import dev.langchain4j.data.document.parser.apache.tika.ApacheTikaDocumentParser
+import dev.langchain4j.data.document.splitter.DocumentSplitters
+import dev.langchain4j.model.openai.OpenAiTokenizer
+import dev.langchain4j.store.embedding.EmbeddingStoreIngestor
 import grails.core.GrailsApplication
 import groovy.transform.CompileStatic
 import dev.langchain4j.data.embedding.Embedding;
@@ -19,6 +22,11 @@ import io.minio.MakeBucketArgs
 import io.minio.MinioClient
 import io.minio.UploadObjectArgs
 import io.minio.errors.MinioException
+
+import dev.langchain4j.data.document.DocumentSplitter;
+import dev.langchain4j.model.Tokenizer;
+
+import static dev.langchain4j.data.document.loader.FileSystemDocumentLoader.*;
 
 class DocumentService {
     def elasticService
@@ -69,38 +77,37 @@ class DocumentService {
 
     def processFiles(String source) {
         //process files found in /documentation/target directory
-       def documents = FileSystemDocumentLoader.loadDocumentsRecursively("/documentation/target")
+       def documents = loadDocumentsRecursively("/documentation/target")
         //Create embedding store
-        /*EmbeddingStore<TextSegment> embeddingStore = ElasticsearchEmbeddingStore.builder()
+        EmbeddingStore<TextSegment> embeddingStore = ElasticsearchEmbeddingStore.builder()
                 .serverUrl(grailsApplication.config.getProperty("elastic",String.class))
                 .dimension(384)
                 .build()
+        DocumentSplitter documentSplitter = new DocumentSplitter() {
+            @Override
+            List<TextSegment> split(dev.langchain4j.data.document.Document document) {
+                return null
+            }
+        }
+
         //define embedding model to be used
-        EmbeddingModel embeddingModel = new AllMiniLmL6V2EmbeddingModel()*/
+        EmbeddingModel embeddingModel = new AllMiniLmL6V2EmbeddingModel()
+        EmbeddingStoreIngestor ingestor = EmbeddingStoreIngestor.builder()
+        //.documentTransformer(...)
+                .documentSplitter(DocumentSplitters.recursive(1000, 200, new OpenAiTokenizer()))
+        //.textSegmentTransformer(...)
+                .embeddingModel(embeddingModel)
+                .embeddingStore(embeddingStore)
+                .build()
         //put each file in Minio S3 bucket
        new File ("/documentation/target").eachFileRecurse () {
            file ->
                {
                    //put each file in Minio S3 Bucket
                    putMinio(file.absolutePath, file.name, source)
-
-                   //convert to text using Elastic's Data Extraction Service
-                   String suffix = "/extract_text/ -T "
-                   def response1 = elasticService.convertToText(suffix, file.absolutePath)
-                   println "Response: " + response1
-                   //$ PUT http://localhost:8090/extract_text/ -T file.absolutePath
-
-                   //chunk document
-                   //String chunk = ""  //insert chunk to be processed for embedding
-                   //TextSegment segment = TextSegment.from(chunk)
-
-                   //Add embedding to chunked text
-                   //Embedding embedding = embeddingModel.embed(segment).content()
-                   //embeddingStore.add(embedding, segment)
-                   //}
-                   //} catch (e) {
-                   //    log.error(e.getMessage())
-                   //}*/
+                   //convert to text using Tika
+                   dev.langchain4j.data.document.Document document = loadDocument(file.absolutePath, new ApacheTikaDocumentParser())
+                   ingestor.ingest(document)
                }
         }
     }

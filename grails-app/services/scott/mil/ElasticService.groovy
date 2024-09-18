@@ -141,32 +141,7 @@ class ElasticService {
         }
     }
 
-    def convertToText(String suffix, String fileAbsolutePath) {
-        def json = ""
-        File file = new File (fileAbsolutePath)
-        def base64 = file.bytes.encodeBase64().toString()
-        println "URI: " + grailsApplication.config.getProperty('tika', String.class) + suffix + base64
-        def uri = grailsApplication.config.getProperty('tika', String.class) + suffix + base64
-        Registry<ConnectionSocketFactory> registry = RegistryBuilder.<ConnectionSocketFactory> create()
-                .register("http", PlainConnectionSocketFactory.getSocketFactory())
-                .build()
-        CloseableHttpClient httpClient = HttpClientBuilder.create()
-                .setConnectionManager(new PoolingHttpClientConnectionManager(registry))
-                .build()
-        HttpPut httpPut = new HttpPut(uri)
-        httpPut.addHeader("Content-Type", "application/json")
-        try {
-            HttpClientContext clientContext = HttpClientContext.create()
-            httpClient.execute(httpPut, clientContext, response -> {
-                json = EntityUtils.toString(response.getEntity())
-            })
-        } catch (e) {
-            log.error ("Elastic Delete Error: " + e.getMessage())
-        } finally {
-            httpClient.close()
-        }
-        return json
-    }
+
 
     def getSslContext() {
         TrustManager[] trustAllCerts = new TrustManager[]{
