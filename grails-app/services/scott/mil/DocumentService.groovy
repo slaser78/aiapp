@@ -26,7 +26,8 @@ import io.minio.errors.MinioException
 import dev.langchain4j.data.document.DocumentSplitter;
 import dev.langchain4j.model.Tokenizer;
 
-import static dev.langchain4j.data.document.loader.FileSystemDocumentLoader.*;
+import static dev.langchain4j.data.document.loader.FileSystemDocumentLoader.*
+import static dev.langchain4j.data.document.splitter.DocumentSplitters.*;
 
 class DocumentService {
     def elasticService
@@ -83,22 +84,16 @@ class DocumentService {
                 .serverUrl(grailsApplication.config.getProperty("elastic",String.class))
                 .dimension(384)
                 .build()
-        DocumentSplitter documentSplitter = new DocumentSplitter() {
-            @Override
-            List<TextSegment> split(dev.langchain4j.data.document.Document document) {
-                return null
-            }
-        }
 
         //define embedding model to be used
         EmbeddingModel embeddingModel = new AllMiniLmL6V2EmbeddingModel()
         EmbeddingStoreIngestor ingestor = EmbeddingStoreIngestor.builder()
-        //.documentTransformer(...)
-                .documentSplitter(DocumentSplitters.recursive(1000, 200, new OpenAiTokenizer()))
-        //.textSegmentTransformer(...)
-                .embeddingModel(embeddingModel)
-                .embeddingStore(embeddingStore)
-                .build()
+            //.documentTransformer(...)
+            .documentSplitter(recursive(1000, 200, new OpenAiTokenizer()))
+            //.textSegmentTransformer(...)
+            .embeddingModel(embeddingModel)
+            .embeddingStore(embeddingStore)
+            .build()
         //put each file in Minio S3 bucket
        new File ("/documentation/target").eachFileRecurse () {
            file ->
