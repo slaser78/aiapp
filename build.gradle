@@ -44,9 +44,9 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-tomcat")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("io.github.jopenlibs:vault-java-driver:6.2.0")
-    implementation 'dev.langchain4j:langchain4j-open-ai:0.33.0'
-    implementation 'dev.langchain4j:langchain4j-easy-rag:0.33.0'
-    implementation 'dev.langchain4j:langchain4j:0.33.0'
+    implementation 'dev.langchain4j:langchain4j-open-ai:0.34.0'
+    implementation 'dev.langchain4j:langchain4j-easy-rag:0.34.0'
+    implementation 'dev.langchain4j:langchain4j:0.34.0'
     implementation 'dev.langchain4j:langchain4j-open-ai-spring-boot-starter:0.33.0'
     implementation 'org.mapdb:mapdb:3.1.0'
     implementation 'org.jetbrains.kotlin:kotlin-stdlib:2.0.10'

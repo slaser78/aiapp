@@ -141,8 +141,6 @@ class ElasticService {
         }
     }
 
-
-
     def getSslContext() {
         TrustManager[] trustAllCerts = new TrustManager[]{
                 new X509TrustManager() {
