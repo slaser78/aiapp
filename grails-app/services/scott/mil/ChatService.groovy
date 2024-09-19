@@ -54,22 +54,22 @@ class ChatService {
     def getChatSettings(String person){
         Person person1 = Person.findWhere(name: person)
         Chat chat = Chat.findWhere(person: person1)
-        def accuracy
+        def temperature
         if (chat) {
-            accuracy = [accuracy: chat.accuracy]
+            temperature = [temperature: chat.temperature]
         } else {
-            accuracy = [accuracy: 0.7]
+            temperature = [temperature: 0.7]
         }
-        return accuracy
+        return temperature
     }
 
-    def setChatSettings(String accuracy, String person, String source, String id){
-        Float accuracy1 = accuracy.toFloat()
+    def setChatSettings(String temperature, String person, String source, String id){
+        Float accuracy1 = temperature.toFloat()
         Person person1 = Person.findWhere(name: person)
         Source source1 = Source.findWhere(name: source)
         Long idValue = Long.valueOf(id)
         Chat chat = Chat.findWhere(id: idValue)
-        chat.accuracy= accuracy1
+        chat.temperature= accuracy1
         chat.person = person1
         chat.source = source1
         chat.save(flush:true)

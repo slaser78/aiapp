@@ -33,14 +33,14 @@ class ChatController {
 
     @Transactional
     def setChatSettings() {
-        String accuracy = params.accuracy
+        String temperature = params.temperature
         String person = params.person
         String source = params.source
         if (params.id) {
             String id = params.id
-            chatService.setChatSettings(accuracy, person, source, id)
+            chatService.setChatSettings(temperature, person, source, id)
         } else {
-            chatService.setChatSettings(accuracy, person, source, null)
+            chatService.setChatSettings(temperature, person, source, null)
         }
         respond "Complete"
     }

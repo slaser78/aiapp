@@ -5,7 +5,7 @@ model {
 }
 json {
     id chat.id
-    accuracy chat.accuracy
+    temperature chat.temperature
     person chat.person
     source chat.source
 }
