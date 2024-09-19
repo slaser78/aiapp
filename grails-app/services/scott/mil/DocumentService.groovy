@@ -1,37 +1,24 @@
 package scott.mil
 
-import dev.langchain4j.data.document.DocumentSplitter
-import dev.langchain4j.data.document.splitter.DocumentSplitters
 import grails.core.GrailsApplication
-
 import dev.langchain4j.data.document.parser.apache.tika.ApacheTikaDocumentParser
-import dev.langchain4j.data.segment.TextSegment;
-import dev.langchain4j.model.embedding.onnx.allminilml6v2.AllMiniLmL6V2EmbeddingModel;
-import dev.langchain4j.model.embedding.EmbeddingModel;
-import dev.langchain4j.store.embedding.EmbeddingStore;
-import dev.langchain4j.store.embedding.elasticsearch.ElasticsearchEmbeddingStore
-import dev.langchain4j.store.embedding.EmbeddingStoreIngestor
-import dev.langchain4j.model.openai.OpenAiTokenizer
-import org.apache.http.HttpHost
-import org.apache.http.auth.AuthScope
-import org.apache.http.auth.UsernamePasswordCredentials
-import org.apache.http.client.CredentialsProvider
-import org.apache.http.impl.client.BasicCredentialsProvider
-
 import static dev.langchain4j.data.document.loader.FileSystemDocumentLoader.*
-import static dev.langchain4j.data.document.splitter.DocumentSplitters.*;
-
-import org.elasticsearch.client.RestClient
-
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import org.apache.commons.io.FileUtils
-
 import io.minio.BucketExistsArgs
 import io.minio.MakeBucketArgs
 import io.minio.MinioClient
 import io.minio.UploadObjectArgs
 import io.minio.errors.MinioException
+
+import dev.langchain4j.data.document.splitter.DocumentByParagraphSplitter;
+import dev.langchain4j.data.document.Document;
+import dev.langchain4j.data.document.Metadata;
+import dev.langchain4j.data.segment.TextSegment;
+import dev.langchain4j.model.Tokenizer;
+import dev.langchain4j.model.openai.OpenAiTokenizer;
+
 
 class DocumentService {
     def elasticService
@@ -84,30 +71,6 @@ class DocumentService {
         //process files found in /documentation/target directory
        def documents = loadDocumentsRecursively("/documentation/target")
         //define embedding model to be used
-        EmbeddingModel embeddingModel = new AllMiniLmL6V2EmbeddingModel()
-
-        CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-        credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials("elastic", (grailsApplication.config.getProperty("elasticpassword", String.class))))
-        RestClient client = RestClient.builder(HttpHost.create(grailsApplication.config.getProperty("elastic", String.class)))
-                .setHttpClientConfigCallback(httpClientBuilder -> {
-                    httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider)
-                    httpClientBuilder.setSSLContext(elasticService.getSslContext())
-                    return httpClientBuilder
-                })
-                .build();
-
-        //Create embedding store
-        EmbeddingStore<TextSegment> embeddingStore = ElasticsearchEmbeddingStore.builder()
-                .restClient(client)
-                .build();
-
-        EmbeddingStoreIngestor ingestor = EmbeddingStoreIngestor.builder()
-            //.documentTransformer(...)
-            .documentSplitter(recursive(1000, 200, new OpenAiTokenizer()))
-            //.textSegmentTransformer(...)
-            .embeddingModel(embeddingModel)
-            .embeddingStore(embeddingStore)
-            .build()
 
        new File ("/documentation/target").eachFileRecurse () {
            file ->
@@ -115,13 +78,20 @@ class DocumentService {
                //put each file in Minio S3 Bucket
                putMinio(file.absolutePath, file.name, source)
                //convert to text using Tika
-               dev.langchain4j.data.document.Document document = loadDocument(file.absolutePath, new ApacheTikaDocumentParser())
-               //apply embeddingStoreIngestor
-               ingestor.ingest(document)
+               Document document = loadDocument(file.absolutePath, new ApacheTikaDocumentParser())
+               String document1 = document.toString()
+               List<String> segments = splitByTokenSize(document1, 1000,200 )
+               println "Segments Size: " + segments.size()
+                   segments.forEach { segment -> {
+                       //Create embedding for segment
 
+                       //upload segment and embedding to specific Elastic Vector Store
+                       //put into "source" index
+                       elasticService.postRest(source, segment, embedding)
+                   }
+               }
            }
        }
-        client.close()
     }
 
     def cleanFiles() {
@@ -157,5 +127,20 @@ class DocumentService {
             log.error ("Error occurred: " + e);
             log.error ("HTTP trace: " + e.httpTrace());
         }
+    }
+
+    List<String> splitByTokenSize(String text, int tokenSize, int overlap) {
+        // Create a tokenizer instance
+        Tokenizer tokenizer = new OpenAiTokenizer();
+
+        // Create a DocumentSplitter with a max segment size of 1024 tokens
+        DocumentByParagraphSplitter splitter = new DocumentByParagraphSplitter(tokenSize, overlap, tokenizer);
+
+        // Create a Document instance
+        Document document = Document.from(text, Metadata.from("document", "0"));
+
+        // Split the text into paragraphs
+        List<TextSegment> segments = splitter.split(document);
+        return segments
     }
 }
