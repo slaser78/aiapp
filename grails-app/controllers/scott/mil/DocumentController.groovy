@@ -15,4 +15,16 @@ class DocumentController {
         documentService.documentUpload(fileName1, source1)
         respond "Complete"
     }
+
+    def delete(Document document) {
+        document.delete(flush:true)
+        respond "Complete"
+    }
+
+    def documentDownload() {
+        //retrieve source and fileName
+        String source = params.getProperty("source")
+        String fileName = params.getProperty("fileName")
+        //retrieve Minio "share" URL
+    }
 }

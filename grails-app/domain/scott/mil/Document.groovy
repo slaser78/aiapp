@@ -5,7 +5,6 @@ class Document {
     Source source
     static belongsTo = [source:Source]
     static constraints = {
-
     }
     String toString() {
         title

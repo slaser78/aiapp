@@ -25,5 +25,6 @@ class UrlMappings {
         "/getSource" (controller: "source", action: 'getSource')
         "/getChat" (controller: "chat", action: 'getChat')
         "/setNewSource" (controller: "source", action: 'setNewSource')
+        "/getSources1" (controller: "source", action: 'getSources1')
     }
 }

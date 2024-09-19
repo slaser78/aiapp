@@ -56,6 +56,37 @@ class ElasticService {
         }
         return json
     }
+
+    def postRest(String suffix, String embedding, String text) {
+        def json = ""
+        def uri = grailsApplication.config.getProperty('elastic', String.class) + suffix
+        String apiKey = grailsApplication.config.getProperty('apikey', String.class)
+        SSLContext sslContext = getSslContext()
+        Registry<ConnectionSocketFactory> registry = RegistryBuilder.<ConnectionSocketFactory> create()
+                .register("https", new SSLConnectionSocketFactory(sslContext))
+                .build()
+        CloseableHttpClient httpClient = HttpClientBuilder.create()
+                .setConnectionManager(new PoolingHttpClientConnectionManager(registry))
+                .build()
+        HttpPost httpPost = new HttpPost(uri)
+        httpPost.addHeader("Content-Type", "application/json")
+        httpPost.addHeader("Authorization", "ApiKey ${apiKey}")
+        StringEntity entity = new StringEntity(text)
+        httpPost.setEntity(entity)
+        try {
+            HttpClientContext clientContext = HttpClientContext.create()
+            httpClient.execute(httpPost, clientContext, response -> {
+                json = EntityUtils.toString(response.getEntity())
+                log.warn ( "JSON: ${json}")
+            })
+        } catch (e) {
+            log.error("Elastic Post Error: " + e.getMessage())
+        } finally {
+            httpClient.close()
+        }
+        return json
+    }
+
     def putRest (String suffix, def query) {
         def json = ""
         String apiKey = grailsApplication.config.getProperty('apikey', String.class)

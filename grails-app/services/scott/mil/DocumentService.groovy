@@ -1,5 +1,9 @@
 package scott.mil
 
+import dev.langchain4j.data.embedding.Embedding
+import dev.langchain4j.model.embedding.EmbeddingModel
+import dev.langchain4j.model.embedding.onnx.allminilml6v2.AllMiniLmL6V2EmbeddingModel
+import dev.langchain4j.model.output.Response
 import grails.core.GrailsApplication
 import dev.langchain4j.data.document.parser.apache.tika.ApacheTikaDocumentParser
 import static dev.langchain4j.data.document.loader.FileSystemDocumentLoader.*
@@ -71,6 +75,8 @@ class DocumentService {
         //process files found in /documentation/target directory
        def documents = loadDocumentsRecursively("/documentation/target")
         //define embedding model to be used
+        Source source1 = Source.findWhere(name: source)
+        List<String> segments
 
        new File ("/documentation/target").eachFileRecurse () {
            file ->
@@ -80,14 +86,22 @@ class DocumentService {
                //convert to text using Tika
                Document document = loadDocument(file.absolutePath, new ApacheTikaDocumentParser())
                String document1 = document.toString()
-               List<String> segments = splitByTokenSize(document1, 1000,200 )
-               println "Segments Size: " + segments.size()
+               new scott.mil.Document (source: source1, title: file.name).save(flush:true)
+               segments = splitByTokenSize(document1, 1000,200 )
                    segments.forEach { segment -> {
                        //Create embedding for segment
-
+                       EmbeddingModel embeddingModel = new AllMiniLmL6V2EmbeddingModel();
+                       Response<Embedding> response = embeddingModel.embed(segment);
+                       Embedding embedding = response.content();
+                       def embedding1 = embedding.vectorAsList()
+                       println "Embedding: " + embedding1
+                       //String embeddingString = embedding.toString()
+                       //String embeddingString1 = embeddingString.replaceAll("Embedding: Embedding \\{ vector = ", "")
+                       //String embeddingString2 = embeddingString1.replace ("\\}","")
+                       //println ("Embedding: " + embeddingString2)
                        //upload segment and embedding to specific Elastic Vector Store
                        //put into "source" index
-                       elasticService.postRest(source, segment, embedding)
+                       //elasticService.postRest(source, segment, embedding)
                    }
                }
            }

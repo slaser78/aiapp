@@ -58,4 +58,10 @@ class SourceController {
         def sourceList = sourceService.getSource(params.person)
         respond sourceList
     }
+
+    @ReadOnly
+    def getSources1() {
+        def sources = Source.findAllWhere(public1: false, enabled: true)
+        respond sources
+    }
 }
