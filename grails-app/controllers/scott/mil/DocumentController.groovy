@@ -18,13 +18,38 @@ class DocumentController {
 
     def delete(Document document) {
         document.delete(flush:true)
+        //delete document entries from Minio and Elastic Search
         respond "Complete"
     }
 
+    //used to download document from Minio
+    //requires generation of temporary Minio share URL
     def documentDownload() {
         //retrieve source and fileName
         String source = params.getProperty("source")
         String fileName = params.getProperty("fileName")
         //retrieve Minio "share" URL
+    }
+
+    //returns public and documents associated with person's sources
+    def getDocuments() {
+        Person person = Person.findWhere(name: params.person)
+        def personSources = PersonSource.findAllWhere(person: person)
+        def sources = Source.findAllWhere(public1: true, enabled: true)
+        for (personSource in personSources) {
+            if (!sources.contains(personSource.source)) {
+                sources.add(personSource.source)
+            }
+        }
+        def documents = []
+        for (source in sources) {
+            def documents1 = Document.findAllWhere(source: source)
+            if (documents1) {
+                for (document in documents1) {
+                    documents.add(document)
+                }
+            }
+            respond documents
+        }
     }
 }

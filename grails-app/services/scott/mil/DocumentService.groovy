@@ -115,22 +115,17 @@ class DocumentService {
         //FileUtils.cleanDirectory(sourceFolder)
     }
 
-    def void putMinio(String absolutePath, String fileName, String source) {
+    def putMinio(String absolutePath, String fileName, String source) {
         try {
-            MinioClient minioClient =
-                    MinioClient.builder()
-                            .endpoint(grailsApplication.config.getProperty("minio", String.class))
-                            .credentials(grailsApplication.config.getProperty("minioaccesskey", String.class), grailsApplication.config.getProperty("miniosecretkey", String.class))
-                            .build()
             // Check if source(name) bucket exists.
             boolean found =
-                    minioClient.bucketExists(BucketExistsArgs.builder().bucket(source).build())
+                    minioClient().bucketExists(BucketExistsArgs.builder().bucket(source).build())
             if (!found) {
                 // Make a new bucket using source(name)
-                minioClient.makeBucket(MakeBucketArgs.builder().bucket(source).build())
+                minioClient().makeBucket(MakeBucketArgs.builder().bucket(source).build())
             }
 
-            minioClient.uploadObject(
+            minioClient().uploadObject(
                     UploadObjectArgs.builder()
                             .bucket(source)
                             .object(fileName)
@@ -156,5 +151,18 @@ class DocumentService {
         // Split the text into paragraphs
         List<TextSegment> segments = splitter.split(document);
         return segments
+    }
+
+    def deleteMinioBucket(String source) {
+        minioClient().removeBucket(source)
+    }
+
+    def minioClient () {
+        MinioClient minioClient =
+                MinioClient.builder()
+                        .endpoint(grailsApplication.config.getProperty("minio", String.class))
+                        .credentials(grailsApplication.config.getProperty("minioaccesskey", String.class), grailsApplication.config.getProperty("miniosecretkey", String.class))
+                        .build()
+        return minioClient
     }
 }

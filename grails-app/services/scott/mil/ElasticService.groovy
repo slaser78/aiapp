@@ -190,8 +190,4 @@ class ElasticService {
         sslContext.init(null, trustAllCerts, new SecureRandom())
         return sslContext
     }
-
-    def convertToText() {
-
-    }
 }

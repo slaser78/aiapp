@@ -18,17 +18,20 @@ class ChatController {
         def settings = chatService.getChatSettings(params.person)
         respond settings
     }
+
     @ReadOnly
     def getChat(){
         Person person = Person.findWhere(name: params.person)
         Chat chat = Chat.findWhere(person: person)
-        if (chat) {
-            def chatValue = ["id":chat.id, "personId":chat.person.id, "person": chat.person.name, "source": chat.source.name, "sourceId": chat.source.id ]
-            respond chatValue
+        def chatValue
+        if (chat.source) {
+            chatValue = ["id":chat.id, "personId":chat.person.id, "person": chat.person.name, "source": chat.source.name, "sourceId": chat.source.id ]
         }
         else {
-            return null
+            def sources = Source.findAllWhere(enabled: true, public1: true)
+            chatValue = ["id":chat.id, "personId":chat.person.id, "person": chat.person.name, "source": sources[0].name, "sourceId": sources[0].id ]
         }
+        respond chatValue
     }
 
     @Transactional

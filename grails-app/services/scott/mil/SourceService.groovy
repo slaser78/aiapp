@@ -110,7 +110,8 @@ class SourceService {
                     sourceList.add(label: source.name, id: source.id)
                 }
             }
-            return sourceList
+            List sourceList2 = sourceList.sort{it.label}
+            return sourceList2
         }
     }
 
@@ -121,7 +122,8 @@ class SourceService {
             return ['label':chat.source.name, 'id':chat.source.id]
         }
         else {
-            return ['label': 'JLLIS', 'id':1]
+            def sources = Source.findAllWhere(public1: true, enabled: true)
+            return ['label': sources[0].name, 'id':sources[0].id]
         }
     }
 }
