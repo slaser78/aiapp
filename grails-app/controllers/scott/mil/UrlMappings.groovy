@@ -27,5 +27,6 @@ class UrlMappings {
         "/setNewSource" (controller: "source", action: 'setNewSource')
         "/getSources1" (controller: "source", action: 'getSources1')
         "/getDocuments" (controller: "document", action: 'getDocuments')
+        "/getMinioDocument" (controller: "document", action: 'getMinioDocument')
     }
 }

@@ -24,11 +24,13 @@ class DocumentController {
 
     //used to download document from Minio
     //requires generation of temporary Minio share URL
-    def documentDownload() {
+    def getMinioDocument() {
         //retrieve source and fileName
         String source = params.getProperty("source")
         String fileName = params.getProperty("fileName")
+        documentService.getMinioDocument(source, fileName)
         //retrieve Minio "share" URL
+
     }
 
     //returns public and documents associated with person's sources

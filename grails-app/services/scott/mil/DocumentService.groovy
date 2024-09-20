@@ -157,6 +157,11 @@ class DocumentService {
         minioClient().removeBucket(source)
     }
 
+    getMinioDocument(String source, String fileName) {
+        def result1 = minioClient().getObject( grailsApplication.config.getProperty("minio") + "/${source}/${fileName}")
+        println result1
+    }
+
     def minioClient () {
         MinioClient minioClient =
                 MinioClient.builder()
